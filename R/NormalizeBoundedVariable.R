@@ -6,9 +6,14 @@
 #' The inverse of the standard normal cumulative distribution function 
 #'   (the quantile function) is used for variables bounded above and below.
 #'
-#' @param x A vector, matrix, array, or dataframe with value to be coerced into a range or set.
-#' @param constraints A list of constraints.  See the examples below for formatting details.
-#' @param tol Variables will be forced to be at least this far away from the boundaries.
+#' @param x A vector, matrix, array, or dataframe with value to be 
+#'   coerced into a range or set.
+#' @param constraints A list of constraints.  See the examples below 
+#'   for formatting details.
+#' @param tol Variables will be forced to be at least this far away 
+#'   from the boundaries.
+#' @param trim If TRUE values in x < lower and values in x > upper 
+#'   will be set to lower and upper, respectively, before normalizing.
 #' @return An object of the same class as \code{x} with the values 
 #'   transformed so that they spread out over any part of the real 
 #'   line.
@@ -31,11 +36,19 @@
 NormalizeBoundedVariable <- 
 function(x, 
   constraints,
-  tol=pnorm(-5)
+  tol=pnorm(-5),
+  trim=TRUE
 ) {
   if( is.null(constraints$lower) ) constraints$lower <- -Inf
   if( is.null(constraints$upper) ) constraints$upper <- Inf
   if( constraints$upper < constraints$lower ) stop("'upper' must be greater than 'lower.'")
+  if( trim ) {
+    x <- pmax(x, constraints$lower)
+    x <- pmin(x, constraints$upper)
+  } else {
+    if( min(x) < constraints$lower ) stop("All values in x must be greater than or equal to the lower bound.")
+    if( max(x) < constraints$upper ) stop("All values in x must be less than or equal to the upper bound.")
+  }
   
   # force values away from boundaries
   if( is.finite(constraints$lower) ) x <- pmax(constraints$lower + tol, x)

@@ -49,24 +49,29 @@ function(
   for(i.row in 1:n.rows) {
     # Transform present data if constrained to an interval
     constrained.row <- x[i.row,]
-    for(i in patterns$FI.cols.bound.to.intervals) {
-      if( !is.na(constrained.row[i]) ) {
-        constrained.row[i] <- NormalizeBoundedVariable(
-          x=constrained.row[i],
-          constraints=patterns$FI.constraints[[i]])
-      } 
+    if( sum(!is.na(constrained.row)) != 0 ) {
+      for(i in patterns$FI.cols.bound.to.intervals) {
+        if( !is.na(constrained.row[i]) ) {
+          constrained.row[i] <- NormalizeBoundedVariable(
+            x=constrained.row[i],
+            constraints=patterns$FI.constraints[[i]])
+        } 
+      }
     }
   
     # Use formula for mean here: http://en.wikipedia.org/wiki/Multivariate_normal_distribution#Conditional_distributions
     cols.to.impute <- which(is.na(constrained.row))    # indices of "1" in Wikipedia formula for mean of conditional multivariate normal distribution
     if( length(cols.to.impute) > 0 ) {
-      known.cols <- setdiff(1:n.cols, cols.to.impute)  # incides of "2" in Wikipedia formula for mean of conditional multivariate normal distribution
-      
-      replacement.values <- t(t(patterns$FI.means[cols.to.impute])) + 
-        patterns$FI.covariance[cols.to.impute,known.cols, drop=FALSE] %*% 
-        solve(a=patterns$FI.covariance[known.cols,known.cols], 
-          b=t(constrained.row[known.cols]) - t(t(patterns$FI.means[known.cols])))
-    
+      if( length(cols.to.impute) == length(constrained.row) ) {
+        replacement.values <- patterns$FI.means
+      } else {
+        known.cols <- setdiff(1:n.cols, cols.to.impute)  # incides of "2" in Wikipedia formula for mean of conditional multivariate normal distribution
+        
+        replacement.values <- t(t(patterns$FI.means[cols.to.impute])) + 
+          patterns$FI.covariance[cols.to.impute,known.cols, drop=FALSE] %*% 
+          solve(a=patterns$FI.covariance[known.cols,known.cols], 
+                b=t(constrained.row[known.cols]) - t(t(patterns$FI.means[known.cols])))
+      }
       # Store replacement values (note that constraints are not yet applied)
       x[i.row,cols.to.impute] <- replacement.values ### PERHAPS ADD as.vector to RHS
     
