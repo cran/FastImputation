@@ -2,7 +2,8 @@
 \alias{NormalizeBoundedVariable}
 \title{Take a variable bounded above/below/both and return an unbounded (normalized) variable.}
 \usage{
-  NormalizeBoundedVariable(x, constraints, tol = pnorm(-5))
+  NormalizeBoundedVariable(x, constraints, tol = pnorm(-5),
+    trim = TRUE)
 }
 \arguments{
   \item{x}{A vector, matrix, array, or dataframe with value
@@ -13,9 +14,25 @@
 
   \item{tol}{Variables will be forced to be at least this
   far away from the boundaries.}
+
+  \item{trim}{If TRUE values in x < lower and values in x >
+  upper will be set to lower and upper, respectively,
+  before normalizing.}
 }
 \value{
-  stuff
+  An object of the same class as \code{x} with the values
+  transformed so that they spread out over any part of the
+  real line.
+
+  A variable \code{x} that is bounded below by \code{lower}
+  is transformed to \code{log(x - lower)}.
+
+  A variable \code{x} that is bounded above by \code{upper}
+  is transformed to \code{log(upper - x)}.
+
+  A variable \code{x} that is bounded below by \code{lower}
+  and above by \code{upper} is transformed to
+  \code{qnorm((x-lower)/(upper - lower))}.
 }
 \description{
   This transforms bounded variables so that they are not
