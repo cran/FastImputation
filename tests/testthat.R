@@ -1,4 +1,4 @@
 library(testthat)
 library(FastImputation)
 
-test_package("FastImputation")
+test_check("FastImputation")
