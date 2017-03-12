@@ -4,12 +4,16 @@
 \alias{TrainFastImputation}
 \title{Learn from the training data so that later you can fill in missing data}
 \usage{
-TrainFastImputation(x, constraints = list())
+TrainFastImputation(x, constraints = list(), idvars, categorical)
 }
 \arguments{
 \item{x}{Dataframe containing training data. Can have incomplete rows.}
 
 \item{constraints}{A list of constraints.  See the examples below for formatting details.}
+
+\item{idvars}{A vector of column numbers or column names to be ignored in the imputation process.}
+
+\item{categorical}{A vector of column numbers or column names of varaibles with a (small) set of possible values.}
 }
 \value{
 An object of class 'FastImputationPatterns' that contains
@@ -22,22 +26,17 @@ multivariate normal.
 }
 \examples{
 
-data(FItrain)   # provides FItrain dataset
-patterns <- TrainFastImputation(FItrain)
+data(FI_train)   # provides FI_train dataset
 
-patterns.with.constraints <- TrainFastImputation(
-  FItrain,
-  constraints=list(list(1, list(set=0:1)),
-                   list(2, list(lower=0)),
-                   list(3, list(lower=0)),
-                   list(4, list(lower=0)),
-                   list(5, list(lower=0)),
-                   list(6, list(lower=0, upper=1)),
-                   list(7, list(lower=0)),
-                   list(8, list(lower=0))))
-}
-\author{
-Stephen R. Haptonstahl \email{srh@haptonstahl.org}
+patterns_with_constraints <- TrainFastImputation(
+  FI_train,
+  constraints=list(list("bounded_below_2", list(lower=0)),
+                   list("bounded_above_5", list(upper=0)),
+                   list("bounded_above_and_below_6", list(lower=0, upper=1))
+                   ),
+  idvars="user_id_1",
+  categorical="categorical_9")
+  
 }
 \references{
 \url{http://gking.harvard.edu/amelia/}
@@ -45,4 +44,6 @@ Stephen R. Haptonstahl \email{srh@haptonstahl.org}
 \seealso{
 \code{\link{FastImputation}}
 }
-
+\author{
+Stephen R. Haptonstahl \email{srh@haptonstahl.org}
+}
